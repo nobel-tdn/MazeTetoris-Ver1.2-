@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.8/lib/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.8/lib/addons/p5.sound.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+
+  </head>
+  <body>
+    <div id="instructions-container">
+      <div id="instructions"></div>
+      <button id="close-instructions" class="close-btn">×</button>
+    </div>
+    <div id="hud"></div>
+    <div id="mobile-shot" style="display:none; position:fixed; bottom:7vh; right:5vw; z-index:1100;">
+      <img src="public/shot.png" id="img-shot" alt="SHOT" style="width:18vw; max-width:110px; height:auto; border-radius:16px; box-shadow:0 4px 16px rgba(0,0,0,0.18);">
+    </div>
+    <div id="mobile-controls" style="display:none">
+      <!-- 左下のスティック型移動ボタン -->
+      <div id="move-stick" class="control-area">
+        <div class="stick-container">
+          <button class="stick-btn" id="btn-up">▲</button>
+          <div class="stick-row">
+            <button class="stick-btn" id="btn-left">◀</button>
+            <div class="stick-center"></div>
+            <button class="stick-btn" id="btn-right">▶</button>
+          </div>
+          <button class="stick-btn" id="btn-down">▼</button>
+        </div>
+      </div>
+      <!-- 右側のショットボタン -->
+      <div id="shot-button" class="control-area">
+        <button class="shot-btn" id="btn-shot">●</button>
+      </div>
+    </div>
+    <script src="sketch.js"></script>
+  </body>
+</html>

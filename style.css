@@ -1,0 +1,281 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+canvas {
+  display: block;
+  margin: 0 auto;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  background: #fff;
+  width: 100vw;
+  height: 100vh;
+}
+#hud {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  z-index: 2000;
+  text-align: center;
+  margin: 0;
+  padding: 0.5em 0 0.7em 0;
+  font-size: 18px;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  color: #222;
+  letter-spacing: 1px;
+  user-select: none;
+  line-height: 1.5;
+  word-break: keep-all;
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+@media (max-width: 600px) {
+  #hud {
+    font-size: 4vw;
+    padding: 0.7em 0 1em 0;
+  }
+}
+.ctrl-btn {
+  width: 16vw;
+  max-width: 70px;
+  height: 16vw;
+  max-height: 70px;
+  font-size: 6vw;
+  max-font-size: 32px;
+  border-radius: 50%;
+  border: 2px solid #888;
+  background: #f8f8f8;
+  margin: 0.5vw;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+  outline: none;
+  user-select: none;
+}
+.ctrl-btn:active {
+  background: #e0e0e0;
+}
+@media (min-width: 600px) {
+  .ctrl-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 24px;
+  }
+}
+
+#mobile-controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30vh;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.control-area {
+  position: absolute;
+  pointer-events: auto;
+}
+
+#move-stick {
+  bottom: 5vh;
+  left: 5vw;
+}
+
+#shot-button {
+  bottom: 5vh;
+  right: 5vw;
+}
+
+.stick-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.stick-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.stick-center {
+  width: 12vw;
+  height: 12vw;
+  max-width: 50px;
+  max-height: 50px;
+}
+
+.stick-btn {
+  width: 12vw;
+  height: 12vw;
+  max-width: 50px;
+  max-height: 50px;
+  font-size: 5vw;
+  max-font-size: 24px;
+  border-radius: 50%;
+  border: 2px solid #666;
+  background: rgba(255, 255, 255, 0.8);
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transition: all 0.1s;
+  outline: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stick-btn:active {
+  background: rgba(200, 200, 200, 0.9);
+  transform: scale(0.95);
+}
+
+.shot-btn {
+  width: 16vw;
+  height: 16vw;
+  max-width: 70px;
+  max-height: 70px;
+  font-size: 8vw;
+  max-font-size: 40px;
+  border-radius: 50%;
+  border: 3px solid #d32f2f;
+  background: rgba(244, 67, 54, 0.8);
+  color: white;
+  box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+  transition: all 0.1s;
+  outline: none;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shot-btn:active {
+  background: rgba(211, 47, 47, 0.9);
+  transform: scale(0.95);
+}
+
+@media (min-width: 600px) {
+  .stick-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  .shot-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 32px;
+  }
+  .stick-center {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+#mobile-shot img {
+  background: #e53935;
+  border: 3px solid #b71c1c;
+  transition: box-shadow 0.1s, filter 0.1s;
+}
+#mobile-shot img:active {
+  filter: brightness(0.85);
+  box-shadow: 0 2px 8px rgba(183,28,28,0.25);
+}
+
+/* バーチャルスティック用 */
+#virtual-stick-canvas {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  z-index: 1050;
+  pointer-events: none;
+}
+
+#instructions-container {
+  position: absolute;
+  left: 2vw;
+  top: 10vh;
+  min-width: 180px;
+  max-width: 260px;
+  z-index: 1100;
+  background: rgba(255,255,255,0.95);
+  color: #222;
+  font-size: 16px;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  padding: 1em 1.2em 1em 1.2em;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+  user-select: none;
+  pointer-events: auto;
+}
+
+#instructions {
+  margin: 0;
+  padding: 0;
+}
+
+.close-btn {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(200, 200, 200, 0.8);
+  color: #666;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.close-btn:hover {
+  background: rgba(180, 180, 180, 0.9);
+  color: #444;
+}
+
+.close-btn:active {
+  background: rgba(160, 160, 160, 1);
+  transform: scale(0.95);
+}
+
+@media (max-width: 900px) {
+  #instructions-container {
+    position: fixed;
+    left: 2vw;
+    bottom: 18vh;
+    top: auto;
+    margin: 0;
+    min-width: 120px;
+    max-width: 70vw;
+    font-size: 4vw;
+    padding: 0.8em 1em 0.8em 1em;
+    z-index: 2100;
+  }
+  
+  .close-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    top: 6px;
+    right: 8px;
+  }
+}
