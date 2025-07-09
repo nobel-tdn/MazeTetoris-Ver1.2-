@@ -26,6 +26,11 @@ let soundMuted = false;
 let soundVolume = 0.8;
 let soundStarted = false;
 
+// --- Sound Refresh System ---
+let soundRefreshInterval = 90 * 1000; // 1分半 = 90秒
+let lastSoundRefresh = 0;
+let soundRefreshEnabled = true;
+
 // --- Instructions UI ---
 let instructionsClosed = false;
 
@@ -104,11 +109,14 @@ function setup() {
   window.addEventListener('keydown', startSoundIfNeeded, {once:true});
   updateInstructions();
   setupInstructionsUI();
+  
+  // サウンドリフレッシュタイマー開始
+  lastSoundRefresh = millis();
 }
 
 function calcMazeOffset() {
   mazeOffsetX = (width - cols * cellSize) / 2;
-  mazeOffsetY = (height - rows * cellSize) / 2 + 40;
+  mazeOffsetY = (height - rows * cellSize) / 2;
 }
 
 let stageStartTime = 0;
@@ -134,6 +142,13 @@ function initStage() {
 
 function draw() {
   background(255);
+  
+  // サウンドリフレッシュチェック
+  if (soundRefreshEnabled && millis() - lastSoundRefresh > soundRefreshInterval) {
+    refreshAllSounds();
+    lastSoundRefresh = millis();
+  }
+  
   // 迷路・プレイヤーなどは中央に描画
   push();
   translate(mazeOffsetX, mazeOffsetY);
@@ -226,6 +241,9 @@ function keyPressed(){
   }
   if(key==='M'||key==='m'){
     toggleMute();
+  }
+  if(key==='R'||key==='r'){
+    toggleSoundRefresh();
   }
 }
 function playerHit(){
@@ -393,7 +411,7 @@ function drawHUD(){
   const hud = document.getElementById('hud');
   if (!hud) return;
   let scoreText = lastStageScore > 0 ? `Score: ${lastStageScore}s` : '';
-  hud.innerHTML = `Stage: ${stage}　Coins left: ${coins.length}　Lives: ${player.lives}　${scoreText ? '｜　'+scoreText : ''}　｜　Sound: <b>${soundMuted ? 'OFF' : 'ON'}</b> (M)`;
+  hud.innerHTML = `Stage: ${stage}　Coins left: ${coins.length}　Lives: ${player.lives}　${scoreText ? '｜　'+scoreText : ''}　｜　Sound: <b>${soundMuted ? 'OFF' : 'ON'}</b> (M)　Refresh: <b>${soundRefreshEnabled ? 'ON' : 'OFF'}</b> (R)`;
 }
 
 function updateInstructions() {
@@ -402,9 +420,9 @@ function updateInstructions() {
   const el = document.getElementById('instructions');
   if (!el) return;
   el.innerHTML =
-    '操作: <b>矢印キー/WASD</b>またはスティックで移動、<b>ショットボタン/スペース</b>で弾を発射。<br>コインを全て集めて<b>赤いゴール</b>へ！'
+    '操作: <b>矢印キー/WASD</b>またはスティックで移動、<b>ショットボタン/スペース</b>で弾を発射。<br>コインを全て集めて<b>赤いゴール</b>へ！<br><b>Mキー</b>でサウンドON/OFF、<b>Rキー</b>でサウンドリフレッシュON/OFF'
     + '<br><br>' +
-    'Controls: Move with <b>arrows/WASD</b> or stick, shoot with <b>button/space</b>.<br>Collect all coins and reach the <b>red goal</b>!';
+    'Controls: Move with <b>arrows/WASD</b> or stick, shoot with <b>button/space</b>.<br>Collect all coins and reach the <b>red goal</b>!<br><b>M key</b> for sound ON/OFF, <b>R key</b> for sound refresh ON/OFF';
 }
 
 function setupInstructionsUI() {
@@ -460,7 +478,7 @@ function drawTrail(){fill(100,100,200,50);noStroke();for(let s of visitedTrail){
 // =============================================================
 //  FALLING BLOCKS (Outline added to drawBlocks)
 // =============================================================
-function spawnFallingBlock(){if(millis()-lastBlockTime>blockSpawnInterval){const tetromino=random(tetrominoes);const shape=tetromino.shape;const shapeWidth=shape[0].length;const i=floor(random(cols-shapeWidth+1));const newBlock={i:i,x:i*cellSize,y:-shape.length*cellSize,shape:shape,color:tetromino.color,};blocks.push(newBlock);lastBlockTime=millis()}}
+function spawnFallingBlock(){if(millis()-lastBlockTime>blockSpawnInterval){const tetromino=random(tetrominoes);const shape=tetromino.shape;const shapeWidth=shape[0].length;const i=floor(random(cols-shapeWidth+1));const newBlock={i:i,x:i*cellSize,y:-shape.length*cellSize - 30,shape:shape,color:tetromino.color,};blocks.push(newBlock);lastBlockTime=millis()}}
 function updateBlocks(){spawnFallingBlock();for(let i=blocks.length-1;i>=0;i--){const b=blocks[i];b.y+=BLOCK_FALL_SPEED;if(b.y>height){blocks.splice(i,1);continue}
 let hitPlayer=false;for(let r=0;r<b.shape.length;r++){for(let c=0;c<b.shape[r].length;c++){if(b.shape[r][c]){const blockCellX=b.x+c*cellSize;const blockCellY=b.y+r*cellSize;const playerX=player.i*cellSize;const playerY=player.j*cellSize;if(playerX<blockCellX+cellSize&&playerX+cellSize>blockCellX&&playerY<blockCellY+cellSize&&playerY+cellSize>blockCellY){hitPlayer=true;break}}}
 if(hitPlayer)break}
@@ -500,6 +518,61 @@ function loadSounds() {
   }
 }
 
+function refreshAllSounds() {
+  console.log('🔄 Refreshing all sounds...');
+  
+  // BGMの再生状態を保存
+  let bgMusicWasPlaying = false;
+  if (bgMusic && bgMusic.isLoaded() && bgMusic.isPlaying()) {
+    bgMusicWasPlaying = true;
+    bgMusic.pause();
+  }
+  
+  // 移動音の再生状態を保存
+  let moveSoundWasPlaying = false;
+  if (moveSound && moveSound.isLoaded() && moveSound.isPlaying()) {
+    moveSoundWasPlaying = true;
+    moveSound.pause();
+  }
+  
+  // すべてのサウンドを再ロード
+  try {
+    moveSound = loadSound('assets/sounds/move.mp3', () => {
+      console.log('✅ moveSound refreshed');
+      if (moveSoundWasPlaying && !soundMuted) {
+        moveSound.setVolume(soundVolume);
+        moveSound.play();
+      }
+    }, soundError);
+    
+    shootSound = loadSound('assets/sounds/shoot.mp3', () => {
+      console.log('✅ shootSound refreshed');
+    }, soundError);
+    
+    hitSound = loadSound('assets/sounds/hit.mp3', () => {
+      console.log('✅ hitSound refreshed');
+    }, soundError);
+    
+    coinSound = loadSound('assets/sounds/coin.mp3', () => {
+      console.log('✅ coinSound refreshed');
+    }, soundError);
+    
+    bgMusic = loadSound('assets/sounds/bg_music.mp3', () => {
+      console.log('✅ bgMusic refreshed');
+      if (bgMusic && bgMusic.isLoaded()) {
+        bgMusic.setVolume(soundVolume * 0.3); // BGM is quieter
+        if (bgMusicWasPlaying && !soundMuted) {
+          bgMusic.loop();
+        }
+      }
+    }, soundError);
+    
+    console.log('🎵 All sounds refreshed successfully!');
+  } catch (e) {
+    console.log('❌ Sound refresh error:', e);
+  }
+}
+
 function soundLoaded() {
   console.log('Sound loaded successfully');
   // BGMはstartSoundIfNeededでのみ再生
@@ -519,10 +592,11 @@ function playMoveSound() {
   if (moveSound && moveSound.isLoaded() && !soundMuted) {
     const now = millis();
     if (now - lastMoveSoundTime > moveSoundInterval) {
-      moveSound.stop();
-      moveSound.setVolume(soundVolume);
-      moveSound.play();
-      lastMoveSoundTime = now;
+      if (!moveSound.isPlaying()) { // 再生中は新たにplayしない
+        moveSound.setVolume(soundVolume);
+        moveSound.play();
+        lastMoveSoundTime = now;
+      }
     }
   }
 }
@@ -559,6 +633,16 @@ function toggleMute() {
   } else {
     if (bgMusic && bgMusic.isLoaded()) bgMusic.loop();
     console.log('Sound unmuted');
+  }
+}
+
+function toggleSoundRefresh() {
+  soundRefreshEnabled = !soundRefreshEnabled;
+  if (soundRefreshEnabled) {
+    lastSoundRefresh = millis(); // リセット
+    console.log('Sound refresh enabled');
+  } else {
+    console.log('Sound refresh disabled');
   }
 }
 
