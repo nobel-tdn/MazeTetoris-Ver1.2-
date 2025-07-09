@@ -108,7 +108,7 @@ function setup() {
 
 function calcMazeOffset() {
   mazeOffsetX = (width - cols * cellSize) / 2;
-  mazeOffsetY = (height - rows * cellSize) / 2 - 40;
+  mazeOffsetY = (height - rows * cellSize) / 2 + 40;
 }
 
 let stageStartTime = 0;
